@@ -59,3 +59,7 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+https://drive.google.com/file/d/1bTe9uSxhiU7WoREIN38MFwbRsqKjbUR-/view?usp=drivesdk
+
+The above link is the link to the available updates of the admin panel... Currently the Flutter app is still on the v2.4 and the update of the admin panel at this point should be to that v2.4 so as to avoid errors 
