@@ -54,7 +54,7 @@ class UserAPIController extends Controller
                 'email' => 'required|email',
                 'password' => 'required',
             ]);
-            if (auth()->attempt(['email' => $request->input('email'), 'password' => $request->input('password')])) {
+            if (auth()->attempt(['email' => $request->input('email'), 'password' => $request->input('password'),'type'=>2])) {
                 // Authentication passed...
                 $user = auth()->user();
                 if (!$user->hasRole('provider')) {
@@ -92,6 +92,7 @@ class UserAPIController extends Controller
             $user->device_token = $request->input('device_token', '');
             $user->password = Hash::make($request->input('password'));
             $user->api_token = Str::random(60);
+            $user->type = 2;
             $user->save();
 
             $defaultRoles = $this->roleRepository->findByField('default', '1');
