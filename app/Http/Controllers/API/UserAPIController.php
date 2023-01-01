@@ -11,10 +11,12 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
+use App\Repositories\CurrencyRepository;
 use App\Repositories\CustomFieldRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\UploadRepository;
 use App\Repositories\UserRepository;
+use App\Repositories\WalletRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,18 +31,22 @@ class UserAPIController extends Controller
     private $uploadRepository;
     private $roleRepository;
     private $customFieldRepository;
+    private $currencyRepository;
+    private $walletRepository;
 
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(UserRepository $userRepository, UploadRepository $uploadRepository, RoleRepository $roleRepository, CustomFieldRepository $customFieldRepo)
+    public function __construct(UserRepository $userRepository, UploadRepository $uploadRepository, RoleRepository $roleRepository, CustomFieldRepository $customFieldRepo,CurrencyRepository $currencyRepo,WalletRepository $walletRepo)
     {
         $this->userRepository = $userRepository;
         $this->uploadRepository = $uploadRepository;
         $this->roleRepository = $roleRepository;
         $this->customFieldRepository = $customFieldRepo;
+        $this->currencyRepository = $currencyRepo;
+        $this->walletRepository = $walletRepo;
     }
 
     function login(Request $request)
@@ -50,7 +56,7 @@ class UserAPIController extends Controller
                 'email' => 'required|email',
                 'password' => 'required',
             ]);
-            if (auth()->attempt(['email' => $request->input('email'), 'password' => $request->input('password'),'type'=>1])) {
+            if (auth()->attempt(['email' => $request->input('email'), 'password' => $request->input('password')])) {
                 // Authentication passed...
                 $user = auth()->user();
                 $user->device_token = $request->input('device_token', '');
@@ -91,7 +97,14 @@ class UserAPIController extends Controller
             $defaultRoles = $this->roleRepository->findByField('default', '1');
             $defaultRoles = $defaultRoles->pluck('name')->toArray();
             $user->assignRole($defaultRoles);
-
+            $walletinput = [];
+            $currency = $this->currencyRepository->find(8);
+            $walletinput['currency'] = $currency;
+            $walletinput['user_id']=$user->id;
+            $walletinput['enabled']=1;
+            $walletinput['name']='Erranda Wallet for user '.$user->id;
+            $wallet = $this->walletRepository->create($walletinput);
+            
             $customFields = $this->customFieldRepository->findByField('custom_field_model', $this->userRepository->model());
 
             foreach (getCustomFieldsValues($customFields, $request) as $value) {

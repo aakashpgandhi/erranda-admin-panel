@@ -27,6 +27,24 @@ Route::prefix('provider')->group(function () {
     Route::get('settings', 'API\EProvider\UserAPIController@settings');
 });
 
+Route::prefix('company')->group(function () {
+    Route::post('login', 'API\Company\UserAPIController@login');
+    Route::post('register', 'API\Company\UserAPIController@register');
+    Route::post('send_reset_link_email', 'API\UserAPIController@sendResetLinkEmail');
+    Route::get('user', 'API\Company\UserAPIController@user');
+    Route::get('logout', 'API\Company\UserAPIController@logout');
+    Route::get('settings', 'API\Company\UserAPIController@settings');
+});
+
+Route::prefix('private-rider')->group(function () {
+    Route::post('login', 'API\PrivateRider\UserAPIController@login');
+    Route::post('register', 'API\PrivateRider\UserAPIController@register');
+    Route::post('send_reset_link_email', 'API\UserAPIController@sendResetLinkEmail');
+    Route::get('user', 'API\PrivateRider\UserAPIController@user');
+    Route::get('logout', 'API\PrivateRider\UserAPIController@logout');
+    Route::get('settings', 'API\PrivateRider\UserAPIController@settings');
+});
+
 
 Route::post('login', 'API\UserAPIController@login');
 Route::post('register', 'API\UserAPIController@register');
@@ -106,4 +124,8 @@ Route::middleware('auth:api')->group(function () {
         'show', 'create', 'edit'
     ]);
     Route::get('wallet_transactions', 'API\WalletTransactionAPIController@index')->name('wallet_transactions.index');
+
+    Route::prefix('company')->group(function () {
+        Route::post('rider-register', 'API\Company\UserAPIController@companyriderregistration');
+    });
 });

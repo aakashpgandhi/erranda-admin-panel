@@ -1,15 +1,12 @@
 <?php
-/*
- * File name: UserAPIController.php
- * Last modified: 2021.08.02 at 22:53:11
- * Author: SmarterVision - https://codecanyon.net/user/smartervision
- * Copyright (c) 2021
- */
 
-namespace App\Http\Controllers\API\EProvider;
+namespace App\Http\Controllers\API\Company;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\Company as CompanyModel;
 use App\Models\User;
 use App\Repositories\CurrencyRepository;
 use App\Repositories\CustomFieldRepository;
@@ -19,7 +16,6 @@ use App\Repositories\UserRepository;
 use App\Repositories\WalletRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -58,7 +54,7 @@ class UserAPIController extends Controller
                 'email' => 'required|email',
                 'password' => 'required',
             ]);
-            if (auth()->attempt(['email' => $request->input('email'), 'password' => $request->input('password'),'type'=>2])) {
+            if (auth()->attempt(['email' => $request->input('email'), 'password' => $request->input('password'),'type'=>4])) {
                 // Authentication passed...
                 $user = auth()->user();
                 if (!$user->hasRole('provider')) {
@@ -96,9 +92,18 @@ class UserAPIController extends Controller
             $user->device_token = $request->input('device_token', '');
             $user->password = Hash::make($request->input('password'));
             $user->api_token = Str::random(60);
-            $user->type = 2;
+            $user->type = 4;
             $user->save();
 
+            //Add in companies table
+            $company = new CompanyModel();
+            $company->user_id = $user->id;
+            $company->name = $user->name;
+            $company->email = $user->email;
+            $company->phone_number=$user->phone_number;
+            $company->save();
+
+            //Default ROles
             $defaultRoles = $this->roleRepository->findByField('default', '1');
             $defaultRoles = $defaultRoles->pluck('name')->toArray();
             $user->assignRole($defaultRoles);
@@ -246,5 +251,42 @@ class UserAPIController extends Controller
             return $this->sendError("Email not configured in your admin panel settings");
         }
 
+    }
+
+    function companyriderregistration(Request $request){
+        try {
+            $this->validate($request, User::$rules);
+            $user = new User;
+            $user->name = $request->input('name');
+            $user->email = $request->input('email');
+            $user->phone_number = $request->input('phone_number');
+            $user->phone_verified_at = $request->input('phone_verified_at');
+            $user->device_token = $request->input('device_token', '');
+            $user->password = Hash::make($request->input('password'));
+            $user->api_token = Str::random(60);
+            $user->type = 5;
+            $user->company_id=$request->user()->id;
+            $user->save();
+
+            //Default ROles
+            $defaultRoles = $this->roleRepository->findByField('default', '1');
+            $defaultRoles = $defaultRoles->pluck('name')->toArray();
+            $user->assignRole($defaultRoles);
+
+            $walletinput = [];
+            $currency = $this->currencyRepository->find(3);
+            $walletinput['currency'] = $currency;
+            $walletinput['user_id']=$user->id;
+            $walletinput['enabled']=1;
+            $walletinput['name']='Erranda Wallet for user '.$user->id;
+            $wallet = $this->walletRepository->create($walletinput);
+        } catch (ValidationException $e) {
+            return $this->sendError(array_values($e->errors()));
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage(), 200);
+        }
+
+
+        return $this->sendResponse($user, 'User retrieved successfully');
     }
 }

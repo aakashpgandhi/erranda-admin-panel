@@ -1,14 +1,10 @@
 <?php
-/*
- * File name: UserAPIController.php
- * Last modified: 2021.08.02 at 22:53:11
- * Author: SmarterVision - https://codecanyon.net/user/smartervision
- * Copyright (c) 2021
- */
 
-namespace App\Http\Controllers\API\EProvider;
+namespace App\Http\Controllers\API\PrivateRider;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use App\Repositories\CurrencyRepository;
@@ -19,7 +15,6 @@ use App\Repositories\UserRepository;
 use App\Repositories\WalletRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -58,7 +53,7 @@ class UserAPIController extends Controller
                 'email' => 'required|email',
                 'password' => 'required',
             ]);
-            if (auth()->attempt(['email' => $request->input('email'), 'password' => $request->input('password'),'type'=>2])) {
+            if (auth()->attempt(['email' => $request->input('email'), 'password' => $request->input('password'),'type'=>3])) {
                 // Authentication passed...
                 $user = auth()->user();
                 if (!$user->hasRole('provider')) {
@@ -96,7 +91,7 @@ class UserAPIController extends Controller
             $user->device_token = $request->input('device_token', '');
             $user->password = Hash::make($request->input('password'));
             $user->api_token = Str::random(60);
-            $user->type = 2;
+            $user->type = 3;
             $user->save();
 
             $defaultRoles = $this->roleRepository->findByField('default', '1');
@@ -110,6 +105,7 @@ class UserAPIController extends Controller
             $walletinput['enabled']=1;
             $walletinput['name']='Erranda Wallet for user '.$user->id;
             $wallet = $this->walletRepository->create($walletinput);
+            
         } catch (ValidationException $e) {
             return $this->sendError(array_values($e->errors()));
         } catch (Exception $e) {
