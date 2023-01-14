@@ -289,4 +289,23 @@ class UserAPIController extends Controller
 
         return $this->sendResponse($user, 'User retrieved successfully');
     }
+
+    function getCompanyRider(Request $request){
+        $getRider=User::where('company_id',$request->user()->id)->get();
+        return $this->sendResponse($getRider, 'Company Riders retrieved successfully');
+    }
+
+    function inactiveRider(Request $request){
+        $rider=User::where('id',$request->user()->id)->first();
+        $rider->status=2;
+        $rider->save();
+        return $this->sendResponse([], 'Company Riders inactivated successfully');
+    }
+
+    function activeRider(Request $request){
+        $rider=User::where('id',$request->user()->id)->first();
+        $rider->status=1;
+        $rider->save();
+        return $this->sendResponse([], 'Company Riders activated successfully');
+    }
 }

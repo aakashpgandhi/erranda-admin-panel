@@ -127,5 +127,8 @@ Route::middleware('auth:api')->group(function () {
 
     Route::prefix('company')->group(function () {
         Route::post('rider-register', 'API\Company\UserAPIController@companyriderregistration');
+        Route::get('all-rider', 'API\Company\UserAPIController@getCompanyRider');
+        Route::get('activate-rider', 'API\Company\UserAPIController@activeRider');
+        Route::get('inactivate-rider', 'API\Company\UserAPIController@inactiveRider');
     });
 });
