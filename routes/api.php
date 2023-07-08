@@ -71,6 +71,9 @@ Route::resource('galleries', 'API\GalleryAPIController');
 Route::get('e_service_reviews/{id}', 'API\EServiceReviewAPIController@show')->name('e_service_reviews.show');
 Route::get('e_service_reviews', 'API\EServiceReviewAPIController@index')->name('e_service_reviews.index');
 
+Route::get('state','API\StateRegionController@getState');
+Route::get('region/{id}','API\StateRegionController@getStateWiseRegion');
+
 Route::resource('currencies', 'API\CurrencyAPIController');
 Route::resource('slides', 'API\SlideAPIController')->except([
     'show'
