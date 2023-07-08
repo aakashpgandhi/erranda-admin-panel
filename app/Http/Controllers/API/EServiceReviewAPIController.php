@@ -12,6 +12,7 @@ namespace App\Http\Controllers\API;
 use App\Criteria\EServiceReviews\EServiceReviewsOfUserCriteria;
 use App\Http\Controllers\Controller;
 use App\Repositories\EServiceReviewRepository;
+use App\Repositories\RiderReviewRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use InfyOm\Generator\Criteria\LimitOffsetCriteria;
@@ -27,10 +28,12 @@ class EServiceReviewAPIController extends Controller
 {
     /** @var  EServiceReviewRepository */
     private $eServiceReviewRepository;
+    private $riderReviewRepository;
 
-    public function __construct(EServiceReviewRepository $eServiceReviewRepo)
+    public function __construct(EServiceReviewRepository $eServiceReviewRepo,RiderReviewRepository $riderReviewRepository)
     {
         $this->eServiceReviewRepository = $eServiceReviewRepo;
+        $this->riderReviewRepository = $riderReviewRepository;
     }
 
     /**
@@ -96,6 +99,26 @@ class EServiceReviewAPIController extends Controller
         $otherInput = $request->except("user_id", "e_service_id");
         try {
             $review = $this->eServiceReviewRepository->updateOrCreate($uniqueInput, $otherInput);
+        } catch (ValidatorException $e) {
+            return $this->sendError(__('lang.not_found', ['operator' => __('lang.e_service_review')]));
+        }
+
+        return $this->sendResponse($review->toArray(), __('lang.saved_successfully', ['operator' => __('lang.e_service_review')]));
+    }
+
+    /**
+     * Store a newly created Rider Review in storage.
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function storerider(Request $request): JsonResponse
+    {
+        $uniqueInput = $request->only("user_id", "rider_id");
+        $otherInput = $request->except("user_id", "user_id");
+        try {
+            $review = $this->riderReviewRepository->updateOrCreate($uniqueInput, $otherInput);
         } catch (ValidatorException $e) {
             return $this->sendError(__('lang.not_found', ['operator' => __('lang.e_service_review')]));
         }

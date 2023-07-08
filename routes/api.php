@@ -104,6 +104,7 @@ Route::middleware('auth:api')->group(function () {
         'index'
     ]);
     Route::post('e_service_reviews', 'API\EServiceReviewAPIController@store')->name('e_service_reviews.store');
+    Route::post('rider_reviews', 'API\EServiceReviewAPIController@storerider')->name('rider.store');
 
 
     Route::resource('favorites', 'API\FavoriteAPIController');
